@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>National Truck Network in Minnesota</title>
+</head>
+<body>
+    <h1>National Truck Network in Minnesota</h1>
+    <button onclick="fetchRoutes()">Show All Routes</button>
+    <button onclick="goBack()" style="display:none;" id="backBtn">Back</button>
+    <br>
+    <h2>Find the segment of a Route, which contains a certain milepoint</h2>
+    <label for="routeID">ID of the Route:</label>
+    <input type="text" id="routeID" name="routeID">
+    <label for="milepoint">Milepoint:</label>
+    <input type="number" id="milepoint" name="milepoint" step="0.1">
+    <button onclick="getSegment()">Show Segment for Milepoint</button>
+  
+    <div id="output" style="margin-top:20px;"></div>
+    <script>
+        function fetchRoutes() {//function to fetch all routes from the json file, calls /routes from main.py"
+            fetch('/routes')
+                .then(response => response.json())
+                .then(data => {
+                    const output = document.getElementById('output');
+                    output.innerHTML = '<h3>Routes:</h3>' + data.routes.join('<br>');
+                    // Show back button
+                    document.getElementById('backBtn').style.display = 'inline';
+                });
+        }
+        function getSegment() {//function to fetch the segment containing the milepoint for a given route from the json file, calls /segment(giving milepoint and routeID) from main.py"
+            const routeID = document.getElementById('routeID').value;
+            const milepoint = document.getElementById('milepoint').value;
+
+            if (!routeID || !milepoint) {
+                alert("Please enter both Route ID and Milepoint");
+                return;
+            }
+
+            fetch(`/segment?route_id=${routeID}&milepoint=${milepoint}`)
+                .then(response => {
+                    if (!response.ok) throw new Error("Segment not found");
+                    return response.json();
+                })
+                .then(data => {
+                    const output = document.getElementById('output');
+                    // Display all fields of the segment
+                    let html = '<h3>Segment Details:</h3>';
+                    for (const key in data) {
+                        html += `<b>${key}</b>: ${JSON.stringify(data[key])}<br>`;
+                    }
+                    output.innerHTML = html;
+                    document.getElementById('backBtn').style.display = 'inline';
+                })
+                .catch(err => {
+                    alert(err.message);
+                });
+        }
+       /*function findSegment(){
+           const latCoord = document.getElementById('latCoord').value;
+           const lonCoord = document.getElementById('lonCoord').value;
+           if (!latCoord || !lonCoord) {
+                alert("Please enter both Coordinates");
+                return;
+            }
+            if (latCoord<1 || lonCoord <1){
+                alert("Please enter Coordinates greater than zero");
+                return;
+            }
+            fetch(`/nearest?lat=${latCoord}&lon=${lonCoord}`)
+                .then(response => {
+                    if (!response.ok) throw new Error("Segment not found");
+                    return response.json();
+                })
+                .then(data => {
+                    const output = document.getElementById('output');
+                    // Display all fields of the segment
+                    let html = '<h3>Segment Details:</h3>';
+                    for (const key in data) {
+                        html += `<b>${key}</b>: ${JSON.stringify(data[key])}<br>`;
+                    }
+                    output.innerHTML = html;
+                    document.getElementById('backBtn').style.display = 'inline';
+                })
+                .catch(err => {
+                    alert(err.message);
+                });
+        }
+        */
+        function goBack() {
+            const output = document.getElementById('output');
+            output.innerHTML = '';
+            document.getElementById('backBtn').style.display = 'none';
+        }
+    </script>
+</body>
+</html>
