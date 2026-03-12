@@ -5,11 +5,14 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from typing import Optional
 import json
-
+import os
 app = FastAPI(title="National Truck Network in Minnesota")
 
 # Load JSON at startup
-with open("Data/mndot_lrs.json") as f:
+
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+data_path = os.path.join(BASE_DIR, "Data", "mndot_lrs.json")
+with open(data_path) as f:
     segments = json.load(f)
     
 # Set up templates folder
